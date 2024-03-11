@@ -1,1 +1,5 @@
 *.csv
+*.json
+.env.local
+poetry.lock
+pyproject.toml
