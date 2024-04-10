@@ -43,8 +43,11 @@ def scrape_url(soup: BeautifulSoup):
     table_el = soup.select_one("div:nth-child(2) > div > div.space-y-0\.5")
     if table_el:
         for row in table_el.find_all("div", class_="flex flex-row justify-between"):
-            key = row.find_all("span")[0].text.strip().rstrip(":")
-            value = row.find_all("span")[1].text.strip()
+            span_area = row.find_all("span")
+            if len(span_area) < 2:
+                continue
+            key = span_area[0].text.strip().rstrip(":")
+            value = span_area[1].text.strip()
             if key == "Founded":
                 output["founded"] = value
             elif key == "Location":
