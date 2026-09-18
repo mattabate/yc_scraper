@@ -19,15 +19,15 @@ BASE = "https://www.ycombinator.com/companies/"
 USER_AGENT = "yc-scraper (+https://github.com/mattabate/yc_scraper)"
 
 _DATA_PAGE = re.compile(r'data-page="([^"]*)"')
-_SLUG = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+_SLUG = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 
 
 class ScrapeError(Exception):
     """A page could not be fetched, or held no company."""
 
 
-def company_url(ref: str) -> str:
-    """Turn a slug ("airbnb") or any company URL into the canonical page URL."""
+def company_slug(ref: str) -> str:
+    """Turn a slug ("airbnb") or any company URL into the bare slug."""
     ref = ref.strip().rstrip("/")
     if ref.startswith(("http://", "https://")):
         if "/companies/" not in ref:
@@ -36,7 +36,12 @@ def company_url(ref: str) -> str:
     ref = ref.lower()
     if not _SLUG.match(ref):
         raise ScrapeError(f"not a YC company slug: {ref!r}")
-    return BASE + ref
+    return ref
+
+
+def company_url(ref: str) -> str:
+    """Turn a slug ("airbnb") or any company URL into the canonical page URL."""
+    return BASE + company_slug(ref)
 
 
 def fetch(url: str, retries: int = 3, backoff: float = 2.0, timeout: float = 30.0) -> str:
@@ -52,7 +57,7 @@ def fetch(url: str, retries: int = 3, backoff: float = 2.0, timeout: float = 30.
                 return resp.read().decode("utf-8", errors="replace")
         except urllib.error.HTTPError as e:
             if e.code == 404:
-                raise ScrapeError(f"{url}: no such company (404)") from e
+                raise ScrapeError(f"{url}: not found (404)") from e
             last = f"HTTP {e.code}"
         except (urllib.error.URLError, TimeoutError) as e:
             last = str(getattr(e, "reason", e))
