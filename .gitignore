@@ -1,5 +1,7 @@
-*.csv
-*.json
-.env.local
-poetry.lock
-pyproject.toml
+output.csv
+output.json
+*.egg-info/
+__pycache__/
+.venv/
+build/
+dist/

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yc-scraper"
+version = "1.0.0"
+description = "Scrape Y Combinator company pages into CSV or JSON."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Matt Abate" }]
+requires-python = ">=3.9"
+dependencies = []
+keywords = ["y-combinator", "scraper", "startups", "csv"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Console",
+]
+
+[project.urls]
+Homepage = "https://github.com/mattabate/yc_scraper"
+
+[project.scripts]
+yc-scraper = "yc_scraper.cli:main"
+
+[tool.setuptools]
+packages = ["yc_scraper"]
