@@ -3,7 +3,8 @@
 Scrape startup information from [Y Combinator](https://www.ycombinator.com/companies)
 company pages into a CSV or JSON file: name, one-liner, description, batch,
 status, year founded, team size, location, website, tags, founders, open jobs
-and social links.
+and social links. Name the companies you want, or take the whole directory
+with `--all`.
 
 ```console
 $ yc-scraper airbnb coinbase doordash -o companies.csv
@@ -48,11 +49,28 @@ only the first column of a CSV is read):
 yc-scraper --input sample_input.csv --output companies.csv
 ```
 
+### Every company
+
+`--all` needs no names: it reads the list of every company in YC's directory
+(about 6,200, active or not) and scrapes each one.
+
+```bash
+yc-scraper --all --output yc.csv
+```
+
+At the default one-second delay a full run takes a couple of hours.
+Rows are written as they arrive, so stopping early keeps what you have; run the
+same command with `--resume` to skip the companies already in the file and
+append the rest. `--limit 20` tries it on the first twenty.
+
 | Option | What it does |
 |---|---|
+| `-a, --all` | every company in YC's directory |
 | `-i, --input FILE` | read slugs or URLs from a file, one per line |
 | `-o, --output FILE` | write to a file; a `.json` name gives JSON, anything else CSV. Default: CSV to stdout |
 | `--json` | JSON on stdout: every field YC publishes, with full founder and job records |
+| `--resume` | skip companies already in the `--output` CSV and append the rest |
+| `--limit N` | stop after N companies |
 | `--delay SECONDS` | pause between requests (default 1) |
 | `--retries N` | tries per page, with exponential backoff (default 3) |
 | `-q, --quiet` | no progress lines on stderr |
@@ -73,10 +91,12 @@ the roles listed on the company's page.
 ### From Python
 
 ```python
-from yc_scraper import scrape
+from yc_scraper import list_companies, scrape
 
 company = scrape("posthog")
 company["batch_name"], company["team_size"]   # ('Winter 2020', '150')
+
+slugs = list_companies()                      # every company slug, A to Z
 ```
 
 ## How it works
@@ -90,10 +110,14 @@ The first version (March 2024) used BeautifulSoup selectors, and YC's redesign
 broke every one of them. Reading the embedded data is what the 2026 rewrite
 changed.
 
-Please scrape politely: the default one-second delay keeps a long list from
-hammering the site. YC's `robots.txt` allows company pages but not the
-directory's search listings (`/companies?…`), which is why you name the
-companies rather than crawl the directory.
+`--all` gets its list from the sitemap YC publishes for search engines,
+`ycombinator.com/companies/sitemap.xml`, which links every company page. The
+directory's search listings (`/companies?…`) are disallowed by YC's
+`robots.txt`, so the scraper never touches them; company pages and the sitemap
+are allowed.
+
+Please scrape politely: the default one-second delay keeps a long run from
+hammering the site.
 
 ## Tests
 
@@ -101,7 +125,8 @@ companies rather than crawl the directory.
 python -m unittest
 ```
 
-The tests are offline: they parse a hand-built page in the shape YC serves.
+The tests are offline: they parse a hand-built page and sitemap in the shapes
+YC serves, and run the command line with the network stubbed out.
 
 ## License
 
