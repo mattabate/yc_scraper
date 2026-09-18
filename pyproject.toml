@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yc-scraper"
-version = "1.0.0"
-description = "Scrape Y Combinator company pages into CSV or JSON."
+version = "1.1.0"
+description = "Scrape Y Combinator company pages, or the whole directory, into CSV or JSON."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Matt Abate" }]
