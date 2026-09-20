@@ -55,11 +55,30 @@ def flatten(company: dict) -> dict:
     }
 
 
+class CsvWriter:
+    """CSV rows written one company at a time, so a long run keeps what it has."""
+
+    def __init__(self, out: IO[str], header: bool = True):
+        self._out = out
+        self._writer = csv.DictWriter(out, fieldnames=COLUMNS)
+        if header:
+            self._writer.writeheader()
+
+    def write(self, company: dict) -> None:
+        self._writer.writerow(flatten(company))
+        self._out.flush()
+
+
 def write_csv(companies: list[dict], out: IO[str]) -> None:
-    writer = csv.DictWriter(out, fieldnames=COLUMNS)
-    writer.writeheader()
+    writer = CsvWriter(out)
     for c in companies:
-        writer.writerow(flatten(c))
+        writer.write(c)
+
+
+def slugs_in_csv(path: str) -> set[str]:
+    """The companies already in a CSV this tool wrote (for --resume)."""
+    with open(path, newline="", encoding="utf-8") as f:
+        return {row["slug"] for row in csv.DictReader(f) if row.get("slug")}
 
 
 def write_json(companies: list[dict], out: IO[str]) -> None:
